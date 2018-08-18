@@ -50,13 +50,13 @@ def show_some_mnist_images(n,x_train,y_train):
         # 1. guess a random number between 0 and 55.000 - 1
         rnd_number = randint(0,nr_train_examples)
         # 2. get corresponding output vector
-        correc_out_vec = y_train(rnd_number,:)
+        correc_out_vec = y_train[rnd_number,:]
         # 3. get first row of 28x28 pixels = 784 values
         row_vec = x_train[rnd_number,:]
         print("type of row_vec is ",type(row_vec))
         print("shape of row_vec is ",row_vec.shape)
         M = row_vec.reshape(28,28)
-        M = cv2.resize(M,None,fx=10,fy=10,interpolation-cv2.INTER_CUBIC)
+        M = cv2.resize(M,None,fx=3,fy=3,interpolation=cv2.INTER_CUBIC)
         cv2.imshow('image',M)
         c = cv2.waitKey(0)
         cv2.destroyAllWindows()
