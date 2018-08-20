@@ -192,4 +192,21 @@ class mlp:
                     # get error singal for neuron_nr2 in the next layer
                     err_vec = self.neuron_err_vecs[nr_neurons_next_layer]
                     err_signal = err_vec[neuron_nr2]
-                    # get weight from neuron_nr
+                    # get weight from neuron_nr to neuron_nr2 in layer_nr + 1
+                    # 
+                    # Import:
+                    # at W[0][neuron_nr2] is the bias weight to neuron_nr2
+                    # at W[1][neuron_nr2] is the first "real" weight to neuron_nr2
+                    weight = W[neuron_nr + 1][neuron_nr2]
+                    sum_of_weighted_error_signals += err_signal * weight
+                # compute and store error signal for neuron with id neuron_nr in this layer
+                err_signal = sum_of_weighted_error_signals
+                if tf_type == TF.sigmoid:
+                    err_signal *= derivative_sigmoid(act_vec[neuron_nr])
+                elif tf_type == TF.identity:
+                    err_signal *= derivative_identity(act_vec[neuron_nr])
+                elif tf_type == TF.relu:
+                    err_signal *= derivative_relu(act_vec[neuron_nr])
+                elif tf_type == TF.squared:
+                    err_signal *= derivative_squared(act_vec[neuron_nr])
+                self.neuron_err_vecs[layer_nr][neuron_nr] = err_signal
