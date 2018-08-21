@@ -1,2 +1,4 @@
 /perception/MNIST_data
 *.pyc
+/mlp/__pycache__
+.vscode

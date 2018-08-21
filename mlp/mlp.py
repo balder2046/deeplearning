@@ -70,17 +70,18 @@ class mlp:
     """
     def add_layer(self,nr_neurons,transfer_function):
         # 1. store the number of neurons and transfer function to use
-        self.nr_neurons_per_layer.append(nr_neurons)
-        self.tf_per_layer.append(transfer_function)
+        
         if self.nr_layers > 0:
             nr_neurons_before = self.nr_neurons_per_layer[-1]
             # initialize the weight from -1 to 1 
-            W = np.uniform.random(low = -1.0,high = 1.0,size=(nr_neurons_before + 1,nr_neurons))
+            W = np.random.uniform(low = -1.0,high = 1.0,size=(nr_neurons_before + 1,nr_neurons))
             # store the new matrix
             self.weight_matrices.append(W)
             print("Generate the new weight matrix ,the new shape is ",W.shape)
             size = W.nbytes / 1024
             print("the weight matrix 's data size is %.2f kb" % size)
+        self.nr_neurons_per_layer.append(nr_neurons)
+        self.tf_per_layer.append(transfer_function)
         act_vec = np.zeros(nr_neurons)
         out_vec = np.zeros(nr_neurons)
         err_vec = np.zeros(nr_neurons)
@@ -95,7 +96,7 @@ class mlp:
     """
     Give a input vector, we compute the output of all neurons layer by layer into the direction of the output layer
     """
-    def feedfoward(self,input_vec):
+    def feedforward(self,input_vec):
         N = len(input_vec)
         self.neuron_out_vecs[0] = input_vec
         for layer_nr in range(1,self.nr_layers):
@@ -107,7 +108,7 @@ class mlp:
             o_Mat = o.reshape((1,N))
             W = self.weight_matrices[layer_nr - 1]
             act_mat_this_layer = np.matmul(o_Mat,W)
-            tfunction = self.tf_per_layer[layer_nr - 1]
+            tfunction = self.tf_per_layer[layer_nr]
             if tfunction == TF.identity:
                 out_mat_this_layer = func_identity(act_mat_this_layer)
             elif tfunction == TF.sigmoid:
@@ -161,8 +162,8 @@ class mlp:
     is more likely to be generated the next time if the input vector is presented as input
     """
     def train(self,input_vec,teacher_vec):
-        # 1. first do a feedfoward step with the input vector
-        self.feedfoward(input_vec)
+        # 1. first do a feedforward step with the input vector
+        self.feedforward(input_vec)
         # 2. first compute the error signals for the output neurons
         tf_type = self.tf_per_layer[-1]
         nr_neurons = self.nr_neurons_per_layer[-1]
@@ -190,7 +191,7 @@ class mlp:
                 sum_of_weighted_error_signals = 0.0
                 for neuron_nr2 in range(0,nr_neurons_next_layer):
                     # get error singal for neuron_nr2 in the next layer
-                    err_vec = self.neuron_err_vecs[nr_neurons_next_layer]
+                    err_vec = self.neuron_err_vecs[layer_nr + 1]
                     err_signal = err_vec[neuron_nr2]
                     # get weight from neuron_nr to neuron_nr2 in layer_nr + 1
                     # 
@@ -210,3 +211,20 @@ class mlp:
                 elif tf_type == TF.squared:
                     err_signal *= derivative_squared(act_vec[neuron_nr])
                 self.neuron_err_vecs[layer_nr][neuron_nr] = err_signal
+            # 4. now that we have the error signals for all neurons (hidden and output neurons)
+            # in the net computed, let's change the weights according to the weight update formulas
+            for layer_nr in range(self.nr_layers -1, 0, -1):
+                nr_neurons_this_layer = self.nr_neurons_per_layer[layer_nr]
+                nr_neurons_pre_layer = self.nr_neurons_per_layer[layer_nr - 1]
+                for neuron_nr in range(0,nr_neurons_this_layer):
+                    # get the error for the neuron
+                    err_signal = self.neuron_err_vecs[layer_nr][neuron_nr]
+                    for weight_nr in range(0,nr_neurons_pre_layer + 1):
+                        # get output value of sending neuron
+                        out_val_sending_neuron = 1
+                        if weight_nr > 0:
+                            out_val_sending_neuron = \
+                            self.neuron_out_vecs[layer_nr - 1][weight_nr - 1]
+                        weight_change = self.learn_rate * err_signal * out_val_sending_neuron
+                        self.weight_matrices[layer_nr - 1][weight_nr][neuron_nr] += weight_change
+
