@@ -107,6 +107,7 @@ class mlp:
             # vectors are one dimensional,but matrxi mulplication must be a matrix
             o_Mat = o.reshape((1,N))
             W = self.weight_matrices[layer_nr - 1]
+            # all act ,column size is neurons_per_layer[layer_nr], row size is 1
             act_mat_this_layer = np.matmul(o_Mat,W)
             tfunction = self.tf_per_layer[layer_nr]
             if tfunction == TF.identity:
