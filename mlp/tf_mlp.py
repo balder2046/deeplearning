@@ -30,9 +30,9 @@ NR_NEURONS_OUTPUT = 2
 # store 2d weight matrices & 1D bias vectors for all
 # neuron layers in two dictionaries
 weights = {
-    'h1',tf.Variable(tf.random_normal([NR_NEURONS_INPUT,NR_NEURONS_HIDDEN1])),
-    'h2',tf.Variable(tf.random_normal([NR_NEURONS_HIDDEN1,NR_NEURONS_HIDDEN2])),
-    'out',tf.Variable(tf.random_normal([NR_NEURONS_HIDDEN2,NR_NEURONS_OUTPUT]))
+    'h1':tf.Variable(tf.random_normal([NR_NEURONS_INPUT,NR_NEURONS_HIDDEN1])),
+    'h2':tf.Variable(tf.random_normal([NR_NEURONS_HIDDEN1,NR_NEURONS_HIDDEN2])),
+    'out':tf.Variable(tf.random_normal([NR_NEURONS_HIDDEN2,NR_NEURONS_OUTPUT]))
 }
 bias = {
     'b1': tf.Variable(tf.random_normal([NR_NEURONS_HIDDEN1])),
@@ -83,7 +83,7 @@ def generate_and_show_training_data():
             color = COLOR_CLASS0
         else:
             color = COLOR_CLASS1
-        cv2.circle(img.sample_coord,RADIUS_SAMPLE,color)
+        cv2.circle(img,sample_coord,RADIUS_SAMPLE,color)
     cv2.imshow('Training data',img)
     c = cv2.waitKey(1)
     cv2.imwrite("e:/tmp/tf/training_data.png",img)
@@ -128,7 +128,7 @@ def build_TF_graph():
     y_out = tf.placeholder("float")
     
     # 2. now the use helper function defined before to generate a MLP
-    mlp_output_vec = multilayer_perceptron(x_in,weights,biases)
+    mlp_output_vec = multilayer_perceptron(x_in,weights,bias)
     # 3. define a loss function
     loss = tf.reduce_mean(tf.squared_difference(mlp_output_vec,y_out))
     # 4. add an optimizer to the graph
@@ -183,8 +183,10 @@ def MLP_training(data_samples, optimizer,mlp_output_vec,loss,x_in,y_out):
             print("Now Testing the MLP ...")
             visualize_decision_boundaries(my_session,epoch_nr,x_in,mlp_output_vec)
 
-            def main():
-                data_samples = generate_and_show_training_data()
-                optimizer,mlp_output_vec,loss,x_in,y_out= build_TF_graph()
-                MLP_training(data_samples,optimizer,mlp_output_vec,loss,x_in,y_out)
-                print("end of MLP TensorFlow test")
+def main():
+    data_samples = generate_and_show_training_data()
+    optimizer,mlp_output_vec,loss,x_in,y_out= build_TF_graph()
+    MLP_training(data_samples,optimizer,mlp_output_vec,loss,x_in,y_out)
+    print("end of MLP TensorFlow test")
+if __name__ == "__main__":
+    main()
